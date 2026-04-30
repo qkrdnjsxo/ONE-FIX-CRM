@@ -1,18 +1,20 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-export const dynamic = 'force-dynamic';
+let supabaseInstance: SupabaseClient | null = null;
 
 function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  if (typeof window === 'undefined') return null;
+  if (!supabaseInstance) {
+    supabaseInstance = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+  }
+  return supabaseInstance;
 }
-
-const supabase = getSupabase();
 
 interface NewDBItem {
   id: string;
@@ -47,7 +49,9 @@ export default function Home() {
 
   async function fetchItems() {
     try {
-      const { data, error } = await supabase
+      const sb = getSupabase();
+      if (!sb) return;
+      const { data, error } = await sb
         .from('new_db')
         .select('*')
         .order('created_at', { ascending: false });
@@ -64,7 +68,9 @@ export default function Home() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     try {
-      const { error } = await supabase
+      const sb = getSupabase();
+      if (!sb) return;
+      const { error } = await sb
         .from('new_db')
         .insert([formData]);
 
@@ -86,7 +92,9 @@ export default function Home() {
 
   async function handleDelete(id: string) {
     try {
-      const { error } = await supabase
+      const sb = getSupabase();
+      if (!sb) return;
+      const { error } = await sb
         .from('new_db')
         .delete()
         .eq('id', id);
