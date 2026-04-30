@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import AIAssistant from './components/AIAssistant';
 
 let supabaseInstance: SupabaseClient | null = null;
 
@@ -218,6 +219,7 @@ export default function Home() {
           </div>
         </div>
       </div>
+      <AIAssistant />
     </main>
   );
 }
