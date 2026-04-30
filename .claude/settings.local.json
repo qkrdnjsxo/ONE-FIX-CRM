@@ -11,7 +11,8 @@
       "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --no-git --import-alias '@/*' --skip-install)",
       "Bash(cd /tmp)",
       "Bash(npx create-next-app@latest one-fix-crm --typescript --tailwind --eslint --no-git --import-alias '@/*' --skip-install)",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Bash(npm run *)"
     ]
   }
 }
