@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:monday.com)",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "mcp__Claude_in_Chrome__navigate",
+      "mcp__Claude_in_Chrome__computer",
+      "mcp__Claude_in_Chrome__read_page",
+      "mcp__Claude_in_Chrome__get_page_text",
+      "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --no-git --import-alias '@/*' --skip-install)",
+      "Bash(cd /tmp)",
+      "Bash(npx create-next-app@latest one-fix-crm --typescript --tailwind --eslint --no-git --import-alias '@/*' --skip-install)",
+      "Bash(npm install *)"
+    ]
+  }
+}
