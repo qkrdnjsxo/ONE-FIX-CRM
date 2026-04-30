@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.1-flash-lite-preview',
       systemInstruction: '당신은 원픽스파트너스의 AI 비서입니다. 영업 CRM 시스템을 도와주는 역할을 합니다. 친절하고 전문적으로 답변해주세요. 한국어로 답변해주세요.',
     });
 
