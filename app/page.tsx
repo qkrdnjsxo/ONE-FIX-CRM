@@ -1,21 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import AIAssistant from './components/AIAssistant';
-
-let supabaseInstance: SupabaseClient | null = null;
-
-function getSupabase() {
-  if (typeof window === 'undefined') return null;
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) return null;
-  if (!supabaseInstance) {
-    supabaseInstance = createClient(url, key);
-  }
-  return supabaseInstance;
-}
 
 interface NewDBItem {
   id: string;
@@ -50,15 +36,9 @@ export default function Home() {
 
   async function fetchItems() {
     try {
-      const sb = getSupabase();
-      if (!sb) return;
-      const { data, error } = await sb
-        .from('new_db')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setItems(data || []);
+      const res = await fetch('/api/new-db');
+      const data = await res.json();
+      setItems(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching:', error);
     } finally {
@@ -69,14 +49,11 @@ export default function Home() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     try {
-      const sb = getSupabase();
-      if (!sb) return;
-      const { error } = await sb
-        .from('new_db')
-        .insert([formData]);
-
-      if (error) throw error;
-
+      await fetch('/api/new-db', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
       setFormData({
         company_name: '',
         phone_number: '',
@@ -84,7 +61,6 @@ export default function Home() {
         business_type: '',
         status: '전자계약서',
       });
-
       fetchItems();
     } catch (error) {
       console.error('Error inserting:', error);
@@ -93,14 +69,7 @@ export default function Home() {
 
   async function handleDelete(id: string) {
     try {
-      const sb = getSupabase();
-      if (!sb) return;
-      const { error } = await sb
-        .from('new_db')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
+      await fetch(`/api/new-db?id=${id}`, { method: 'DELETE' });
       fetchItems();
     } catch (error) {
       console.error('Error deleting:', error);
