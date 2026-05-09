@@ -1,16 +1,24 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from '../../../lib/config';
+import { SUPABASE_URL } from '../../../lib/config';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const secretKey = process.env.SUPABASE_SECRET_KEY;
+    if (!secretKey) {
+      return NextResponse.json({ success: false, error: 'SUPABASE_SECRET_KEY 없음' });
+    }
 
-    const { data, error } = await supabase.auth.signUp({
-      email: 'admin@onefix.com',
-      password: 'OneFixAdmin2025!',
+    const supabase = createClient(SUPABASE_URL, secretKey, {
+      auth: { autoRefreshToken: false, persistSession: false }
+    });
+
+    // 기존 유저 이메일 인증 처리
+    const userId = '27ea628f-7dd5-4c71-ac07-67419db6f7d';
+    const { data, error } = await supabase.auth.admin.updateUser(userId, {
+      email_confirm: true,
     });
 
     if (error) {
@@ -19,11 +27,10 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
-      message: '계정 생성 완료! 이메일 인증 확인 필요할 수 있음',
+      message: '이메일 인증 완료! 이제 로그인 하세요.',
       email: 'admin@onefix.com',
       password: 'OneFixAdmin2025!',
-      user_id: data.user?.id,
-      confirmed: data.user?.email_confirmed_at ? true : false,
+      confirmed: data.user.email_confirmed_at ? true : false,
     });
   } catch (err) {
     return NextResponse.json({ success: false, error: String(err) });
