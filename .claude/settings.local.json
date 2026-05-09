@@ -15,7 +15,8 @@
       "Bash(npm run *)",
       "Bash(npx vercel *)",
       "WebFetch(domain:ai.google.dev)",
-      "Bash(findstr /i \"supabase\\\\|next\\\\|react\")"
+      "Bash(findstr /i \"supabase\\\\|next\\\\|react\")",
+      "Bash(node -e ' *)"
     ]
   }
 }

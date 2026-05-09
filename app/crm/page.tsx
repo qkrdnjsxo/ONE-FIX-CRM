@@ -4,12 +4,10 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import AIAssistant from '../components/AIAssistant';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '../../lib/config';
 
 function getSupabase() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) return null;
-  return createClient(url, key);
+  return createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 }
 
 interface NewDBItem {
@@ -39,12 +37,6 @@ export default function CRMPage() {
   useEffect(() => {
     async function checkAuth() {
       const supabase = getSupabase();
-      if (!supabase) {
-        // 환경변수 없으면 개발모드로 허용
-        setAuthChecked(true);
-        fetchItems();
-        return;
-      }
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         router.replace('/login');
