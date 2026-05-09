@@ -12,7 +12,10 @@
       "Bash(cd /tmp)",
       "Bash(npx create-next-app@latest one-fix-crm --typescript --tailwind --eslint --no-git --import-alias '@/*' --skip-install)",
       "Bash(npm install *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(npx vercel *)",
+      "WebFetch(domain:ai.google.dev)",
+      "Bash(findstr /i \"supabase\\\\|next\\\\|react\")"
     ]
   }
 }
