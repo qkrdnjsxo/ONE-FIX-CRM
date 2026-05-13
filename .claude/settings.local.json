@@ -16,7 +16,15 @@
       "Bash(npx vercel *)",
       "WebFetch(domain:ai.google.dev)",
       "Bash(findstr /i \"supabase\\\\|next\\\\|react\")",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "mcp__Claude_in_Chrome__browser_batch",
+      "Bash(findstr \"next-auth\\\\|bcrypt\")",
+      "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\(JSON.stringify\\(p.dependencies,null,2\\)\\)\")",
+      "Bash(node -e \"const c=require\\('crypto'\\);console.log\\(c.randomBytes\\(32\\).toString\\('hex'\\)\\)\")",
+      "Bash(mkdir \"C:\\\\Users\\\\박원태1\\\\Desktop\\\\최비서\\\\app\\\\api\\\\auth\\\\[...nextauth]\" 2>nul & echo done)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
     ]
   }
 }
