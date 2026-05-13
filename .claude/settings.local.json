@@ -24,7 +24,9 @@
       "Bash(mkdir \"C:\\\\Users\\\\박원태1\\\\Desktop\\\\최비서\\\\app\\\\api\\\\auth\\\\[...nextauth]\" 2>nul & echo done)",
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(rmdir /s /q \"app\\\\api\\\\setup-admin\")",
+      "Bash(git commit *)"
     ]
   }
 }
