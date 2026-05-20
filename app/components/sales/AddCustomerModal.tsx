@@ -20,6 +20,7 @@ export default function AddCustomerModal({ defaultSubStatus = 'lead', onClose, o
     reaction: '',
     result: '',
     sub_status: defaultSubStatus,
+    original_source: defaultSubStatus === 'db010' ? 'db010' : 'lead',
     memo: '',
   });
   const [saving, setSaving] = useState(false);
@@ -51,6 +52,7 @@ export default function AddCustomerModal({ defaultSubStatus = 'lead', onClose, o
             reaction: form.reaction,
             result: form.result,
             sub_status: form.sub_status,
+            original_source: form.original_source,
             memo: form.memo,
           },
         }),
@@ -186,6 +188,17 @@ export default function AddCustomerModal({ defaultSubStatus = 'lead', onClose, o
                 <option value="db010">직접DB</option>
                 <option value="emotional">지속관리</option>
                 <option value="trash">자체거절</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-slate-400 text-xs block mb-1">유입경로 (최초)</label>
+              <select
+                value={form.original_source}
+                onChange={e => setForm(f => ({ ...f, original_source: e.target.value }))}
+                className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
+              >
+                <option value="lead">공급DB</option>
+                <option value="db010">직접DB</option>
               </select>
             </div>
           </div>

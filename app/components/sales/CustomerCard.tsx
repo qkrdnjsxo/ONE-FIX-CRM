@@ -34,6 +34,7 @@ interface Customer {
     reaction?: string;
     result?: string;
     sales_user_name?: string;
+    original_source?: string;
     contract_date?: string;
     payment_amount?: number;
     payment_method?: string;
@@ -127,6 +128,11 @@ export default function CustomerCard({ customer, onUpdate, onDelete, role }: Pro
           <span className={`text-xs px-2 py-0.5 rounded-full border font-medium shrink-0 ${statusColor}`}>
             {statusLabel}
           </span>
+          {customer.details?.original_source && sub !== 'lead' && sub !== 'db010' && (
+            <span className="text-xs px-1.5 py-0.5 rounded border border-slate-600 text-slate-400 shrink-0">
+              {customer.details.original_source === 'db010' ? '직접DB출신' : '공급DB출신'}
+            </span>
+          )}
           <span className="font-semibold truncate">{customer.company_name}</span>
           {customer.ceo_name && <span className="text-slate-400 text-sm hidden sm:block">{customer.ceo_name}</span>}
           {customer.phone && <span className="text-slate-500 text-sm hidden md:block">{customer.phone}</span>}
@@ -156,6 +162,7 @@ export default function CustomerCard({ customer, onUpdate, onDelete, role }: Pro
                 <Field label="사업주소" value={customer.details?.business_address} />
                 <Field label="사업종류" value={customer.details?.business_type} />
                 <Field label="담당자" value={customer.details?.sales_user_name} />
+                <Field label="유입경로" value={customer.details?.original_source === 'db010' ? '직접DB' : customer.details?.original_source === 'lead' ? '공급DB' : customer.details?.original_source} />
                 <Field label="상담일" value={customer.details?.consultation_date} />
                 <Field label="재통화일정" value={customer.details?.next_call_date} />
                 <Field label="반응" value={customer.details?.reaction} />
