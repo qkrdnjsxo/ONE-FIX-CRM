@@ -5,6 +5,7 @@ import AIAssistant from '../AIAssistant';
 import CustomerCard from '../sales/CustomerCard';
 import AddCustomerModal from '../sales/AddCustomerModal';
 import ReportTab from '../sales/ReportTab';
+import NoticeBoard from '../shared/NoticeBoard';
 
 const TABS = [
   { id: 'home', label: '홈보드', icon: '🏠' },
@@ -16,6 +17,8 @@ const TABS = [
   { id: 'as_request', label: 'A/S요청', icon: '🔧' },
   { id: 'revenue', label: '매출통계', icon: '📊' },
   { id: 'briefing', label: 'AI브리핑', icon: '🤖' },
+  { id: 'notice', label: '공지사항', icon: '📢' },
+  { id: 'sheets', label: '결제율', icon: '📊' },
   { id: 'report', label: '업무보고', icon: '📝' },
   { id: 'users', label: '직원관리', icon: '⚙️' },
 ];
@@ -184,6 +187,12 @@ export default function CeoDashboard({ session }: { session: any }) {
 
           {/* AI 브리핑 */}
           {activeTab === 'briefing' && <BriefingTab />}
+
+          {/* 공지사항 */}
+          {activeTab === 'notice' && <NoticeBoard role="ceo" />}
+
+          {/* 결제율 (구글시트) */}
+          {activeTab === 'sheets' && <SheetsTab />}
 
           {/* 업무보고 */}
           {activeTab === 'report' && <ReportTab />}
@@ -1028,6 +1037,67 @@ function BriefingTab() {
               </div>
             </div>
           )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── 구글시트 결제율 탭 ─── */
+function SheetsTab() {
+  const [data, setData] = useState<string[][]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [range, setRange] = useState('Sheet1!A1:Z50');
+
+  async function load() {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch(`/api/sheets?range=${encodeURIComponent(range)}`);
+      const d = await res.json();
+      if (res.ok) setData(d.data || []);
+      else setError(d.error || '불러오기 실패');
+    } catch { setError('네트워크 오류'); }
+    setLoading(false);
+  }
+
+  return (
+    <div>
+      <div className="flex items-center gap-3 mb-4 flex-wrap">
+        <h3 className="text-lg font-bold">📊 결제율 (구글시트)</h3>
+        <input type="text" value={range} onChange={e => setRange(e.target.value)}
+          className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-yellow-500 w-48"
+          placeholder="범위 (예: Sheet1!A1:Z50)" />
+        <button onClick={load} disabled={loading}
+          className="bg-yellow-600 hover:bg-yellow-500 disabled:opacity-50 text-black font-semibold text-sm px-4 py-1.5 rounded-lg">
+          {loading ? '불러오는 중...' : '불러오기'}
+        </button>
+      </div>
+
+      {error && <p className="bg-red-900/40 border border-red-700 text-red-300 text-sm rounded-lg px-4 py-3 mb-4">{error}</p>}
+
+      {data.length === 0 && !loading ? (
+        <div className="text-center text-slate-500 py-20">
+          <p className="text-4xl mb-3">📊</p>
+          <p>불러오기 버튼을 클릭하세요</p>
+          <p className="text-xs mt-2">연결된 구글 스프레드시트: {process.env.NEXT_PUBLIC_SHEETS_ID || '설정됨'}</p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border-collapse">
+            <tbody>
+              {data.map((row, i) => (
+                <tr key={i} className={i === 0 ? 'bg-slate-700' : i % 2 === 0 ? 'bg-slate-800' : 'bg-slate-850'}>
+                  {row.map((cell, j) => (
+                    <td key={j} className={`px-3 py-2 border border-slate-700 ${i === 0 ? 'font-semibold text-white' : 'text-slate-300'}`}>
+                      {cell}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

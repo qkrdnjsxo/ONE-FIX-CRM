@@ -5,6 +5,7 @@ import AIAssistant from '../AIAssistant';
 import CustomerBoard from './CustomerBoard';
 import ReportTab from './ReportTab';
 import RequestModal from './RequestModal';
+import NoticeBoard from '../shared/NoticeBoard';
 
 const TABS = [
   { id: 'home', label: '홈보드', icon: '🏠' },
@@ -16,6 +17,7 @@ const TABS = [
   { id: 'revenue', label: '매출현황', icon: '💰' },
   { id: 'review', label: '심사요청', icon: '📋' },
   { id: 'as', label: 'A/S요청', icon: '🔧' },
+  { id: 'notice', label: '공지사항', icon: '📢' },
   { id: 'report', label: '업무보고', icon: '📝' },
 ];
 
@@ -231,6 +233,9 @@ export default function SalesDashboard({ session }: { session: any }) {
 
           {/* A/S요청 */}
           {activeTab === 'as' && <SalesRequestTab type="as" />}
+
+          {/* 공지사항 */}
+          {activeTab === 'notice' && <NoticeBoard role="sales" />}
 
           {/* 업무보고 */}
           {activeTab === 'report' && <ReportTab />}

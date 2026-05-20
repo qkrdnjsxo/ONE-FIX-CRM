@@ -3,12 +3,14 @@ import { useState, useEffect, useCallback } from 'react';
 import { signOut } from 'next-auth/react';
 import AIAssistant from '../AIAssistant';
 import ReportTab from '../sales/ReportTab';
+import NoticeBoard from '../shared/NoticeBoard';
 
 const TABS = [
   { id: 'home', label: '홈보드', icon: '🏠' },
   { id: 'new', label: '신규건', icon: '🆕' },
   { id: 'ongoing', label: '진행현황', icon: '📊' },
   { id: 'as', label: 'A/S 요청', icon: '🔧' },
+  { id: 'notice', label: '공지사항', icon: '📢' },
   { id: 'report', label: '업무보고', icon: '📝' },
 ];
 
@@ -151,6 +153,7 @@ export default function OpsDashboard({ session }: { session: any }) {
           {activeTab === 'new' && <OpsCaseBoard status="new" title="신규건" />}
           {activeTab === 'ongoing' && <OpsCaseBoard status="ongoing" title="진행현황" />}
           {activeTab === 'as' && <OpsCaseBoard status="as_request" title="A/S 요청" />}
+          {activeTab === 'notice' && <NoticeBoard role="ops" />}
           {activeTab === 'report' && <ReportTab />}
         </main>
       </div>

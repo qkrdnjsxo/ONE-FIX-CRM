@@ -26,7 +26,12 @@
       "Bash(git commit -m ' *)",
       "Bash(git push *)",
       "Bash(rmdir /s /q \"app\\\\api\\\\setup-admin\")",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(node -e \"const bcrypt = require\\('bcryptjs'\\); bcrypt.hash\\('1234', 10\\).then\\(h => console.log\\(h\\)\\)\")",
+      "Bash(mkdir \"C:\\\\Users\\\\박원태1\\\\Desktop\\\\최비서\\\\app\\\\api\\\\customers\\\\[id]\")",
+      "Bash(mkdir \"C:\\\\Users\\\\박원태1\\\\Desktop\\\\최비서\\\\app\\\\api\\\\ops-cases\\\\[id]\")",
+      "Bash(rm app/api/debug-login/route.ts)",
+      "Bash(rmdir app/api/debug-login)"
     ]
   }
 }
