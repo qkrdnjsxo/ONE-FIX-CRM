@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-lite' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite-preview' });
 
     const reportText = reports && reports.length > 0
       ? reports.map(r => `[${r.author_name} - ${r.report_type}] ${r.content}`).join('\n')
