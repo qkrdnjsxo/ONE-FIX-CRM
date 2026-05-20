@@ -11,7 +11,11 @@ const TABS = [
   { id: 'customer', label: '고객관리', icon: '👥' },
   { id: 'supply', label: '공급현황', icon: '📦' },
   { id: 'move_db', label: 'DB이동', icon: '🔄' },
+  { id: 'assign_db', label: '한경연DB배정', icon: '🎯' },
+  { id: 'review', label: '심사요청', icon: '📋' },
+  { id: 'as_request', label: 'A/S요청', icon: '🔧' },
   { id: 'revenue', label: '매출통계', icon: '📊' },
+  { id: 'briefing', label: 'AI브리핑', icon: '🤖' },
   { id: 'report', label: '업무보고', icon: '📝' },
   { id: 'users', label: '직원관리', icon: '⚙️' },
 ];
@@ -166,8 +170,20 @@ export default function CeoDashboard({ session }: { session: any }) {
           {/* DB이동 */}
           {activeTab === 'move_db' && <MoveDbTab />}
 
+          {/* 한경연DB배정 */}
+          {activeTab === 'assign_db' && <AssignDbTab />}
+
+          {/* 심사요청 */}
+          {activeTab === 'review' && <RequestsTab type="review" title="심사요청" />}
+
+          {/* A/S요청 */}
+          {activeTab === 'as_request' && <RequestsTab type="as" title="A/S요청" />}
+
           {/* 매출통계 */}
           {activeTab === 'revenue' && <CeoRevenueTab />}
+
+          {/* AI 브리핑 */}
+          {activeTab === 'briefing' && <BriefingTab />}
 
           {/* 업무보고 */}
           {activeTab === 'report' && <ReportTab />}
@@ -689,6 +705,329 @@ function UsersTab() {
               </button>
             </div>
           ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── 한경연 DB배정 탭 ─── */
+function AssignDbTab() {
+  const [customers, setCustomers] = useState<any[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [targetUser, setTargetUser] = useState('');
+  const [assigning, setAssigning] = useState(false);
+  const [msg, setMsg] = useState('');
+  const [filterOwner, setFilterOwner] = useState('unassigned');
+
+  useEffect(() => {
+    async function load() {
+      setLoading(true);
+      const [custRes, usersRes] = await Promise.all([
+        fetch('/api/customers'),
+        fetch('/api/admin/users'),
+      ]);
+      if (custRes.ok) setCustomers(await custRes.json());
+      if (usersRes.ok) setUsers((await usersRes.json()).filter((u: any) => u.role === 'sales'));
+      setLoading(false);
+    }
+    load();
+  }, []);
+
+  const filtered = customers.filter(c => {
+    const q = search.toLowerCase();
+    const matchSearch = c.company_name?.toLowerCase().includes(q) || c.ceo_name?.toLowerCase().includes(q);
+    const matchOwner = filterOwner === 'all' ? true : filterOwner === 'unassigned' ? !c.owner_id : c.owner_id === filterOwner;
+    return matchSearch && matchOwner;
+  });
+
+  function toggleSelect(id: string) {
+    setSelectedIds(prev => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; });
+  }
+
+  async function handleAssign() {
+    if (!targetUser || selectedIds.size === 0) return;
+    setAssigning(true);
+    let ok = 0;
+    const targetUserObj = users.find(u => u.id === targetUser);
+    for (const id of Array.from(selectedIds)) {
+      const res = await fetch(`/api/customers/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          owner_id: targetUser,
+          details: { sales_user_name: targetUserObj?.name },
+        }),
+      });
+      if (res.ok) ok++;
+    }
+    setMsg(`${ok}건 배정 완료 → ${targetUserObj?.name}`);
+    setSelectedIds(new Set());
+    const res = await fetch('/api/customers');
+    if (res.ok) setCustomers(await res.json());
+    setAssigning(false);
+    setTimeout(() => setMsg(''), 4000);
+  }
+
+  return (
+    <div>
+      <div className="flex items-center gap-3 mb-4 flex-wrap">
+        <h3 className="text-lg font-bold">한경연 DB배정</h3>
+        <div className="flex gap-1.5 flex-wrap">
+          {[
+            { value: 'unassigned', label: '미배정' },
+            { value: 'all', label: '전체' },
+            ...users.map(u => ({ value: u.id, label: u.name })),
+          ].map(f => (
+            <button key={f.value} onClick={() => setFilterOwner(f.value)}
+              className={`text-xs px-3 py-1 rounded-full transition-colors ${filterOwner === f.value ? 'bg-yellow-500 text-black font-semibold' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {selectedIds.size > 0 && (
+        <div className="bg-slate-800 border border-yellow-600/40 rounded-xl px-4 py-3 mb-4 flex items-center gap-3 flex-wrap">
+          <span className="text-yellow-400 font-semibold">{selectedIds.size}건 선택됨</span>
+          <select value={targetUser} onChange={e => setTargetUser(e.target.value)}
+            className="bg-slate-900 border border-slate-600 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none">
+            <option value="">담당자 선택</option>
+            {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+          </select>
+          <button onClick={handleAssign} disabled={!targetUser || assigning}
+            className="bg-yellow-600 hover:bg-yellow-500 disabled:opacity-50 text-black font-semibold text-sm px-4 py-1.5 rounded-lg">
+            {assigning ? '배정 중...' : '배정'}
+          </button>
+          <button onClick={() => setSelectedIds(new Set())} className="text-slate-400 text-sm">취소</button>
+        </div>
+      )}
+
+      {msg && <p className="bg-emerald-900/40 border border-emerald-700 text-emerald-300 text-sm rounded-lg px-3 py-2 mb-3">{msg}</p>}
+
+      <div className="relative mb-4">
+        <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="업체명, 대표자 검색..."
+          className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yellow-500 pl-8" />
+        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm">🔍</span>
+      </div>
+
+      {loading ? <p className="text-center text-slate-500 py-8">불러오는 중...</p> : (
+        <div className="space-y-2">
+          {filtered.map(c => {
+            const ownerName = c.details?.sales_user_name || users.find((u: any) => u.id === c.owner_id)?.name || '미배정';
+            return (
+              <div key={c.id} onClick={() => toggleSelect(c.id)}
+                className={`flex items-center gap-3 bg-slate-800 border rounded-xl px-4 py-3 cursor-pointer transition-colors ${selectedIds.has(c.id) ? 'border-yellow-500 bg-yellow-900/20' : 'border-slate-700 hover:border-slate-500'}`}>
+                <div className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 ${selectedIds.has(c.id) ? 'bg-yellow-500 border-yellow-500' : 'border-slate-600'}`}>
+                  {selectedIds.has(c.id) && <span className="text-black text-xs">✓</span>}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold truncate">{c.company_name}</p>
+                  <p className="text-xs text-slate-400">{c.details?.sub_status || c.status} | {c.details?.business_type || '-'}</p>
+                </div>
+                <span className={`text-xs px-2 py-0.5 rounded-full ${c.owner_id ? 'bg-blue-500/20 text-blue-300' : 'bg-slate-600/50 text-slate-400'}`}>
+                  {ownerName}
+                </span>
+              </div>
+            );
+          })}
+          {filtered.length === 0 && <p className="text-center text-slate-500 py-8">해당 조건의 데이터가 없습니다.</p>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── 요청 탭 (심사요청 / A/S요청) ─── */
+const REQ_STATUS_LABELS: Record<string, string> = { pending: '대기', approved: '승인', rejected: '반려', done: '완료' };
+const REQ_STATUS_COLORS: Record<string, string> = {
+  pending: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+  approved: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+  rejected: 'bg-red-500/20 text-red-300 border-red-500/30',
+  done: 'bg-slate-500/20 text-slate-400 border-slate-500/30',
+};
+
+function RequestsTab({ type, title }: { type: string; title: string }) {
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('pending');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    const params = new URLSearchParams({ type });
+    if (filter !== 'all') params.set('status', filter);
+    const res = await fetch(`/api/requests?${params.toString()}`);
+    if (res.ok) setItems(await res.json());
+    setLoading(false);
+  }, [type, filter]);
+
+  useEffect(() => { load(); }, [load]);
+
+  async function handleStatusChange(id: string, status: string) {
+    const res = await fetch(`/api/requests/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ request_status: status }),
+    });
+    if (res.ok) {
+      if (filter !== 'all') setItems(p => p.filter(r => r.id !== id));
+      else { const u = await res.json(); setItems(p => p.map(r => r.id === id ? u : r)); }
+    }
+  }
+
+  return (
+    <div>
+      <div className="flex items-center gap-3 mb-4 flex-wrap">
+        <h3 className="text-lg font-bold">{title}</h3>
+        <div className="flex gap-1.5">
+          {[{ value: 'pending', label: '대기' }, { value: 'all', label: '전체' }, { value: 'approved', label: '승인' }, { value: 'done', label: '완료' }].map(f => (
+            <button key={f.value} onClick={() => setFilter(f.value)}
+              className={`text-xs px-3 py-1 rounded-full transition-colors ${filter === f.value ? 'bg-yellow-500 text-black font-semibold' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {loading ? <p className="text-center text-slate-500 py-8">불러오는 중...</p> : items.length === 0 ? (
+        <div className="text-center text-slate-500 py-16">
+          <p className="text-4xl mb-3">{type === 'review' ? '📋' : '🔧'}</p>
+          <p>해당 {title}이 없습니다.</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {items.map(r => (
+            <div key={r.id} className="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-3 cursor-pointer" onClick={() => setExpandedId(expandedId === r.id ? null : r.id)}>
+                <div className="flex items-center gap-3">
+                  <span className={`text-xs px-2 py-0.5 rounded-full border ${REQ_STATUS_COLORS[r.request_status]}`}>
+                    {REQ_STATUS_LABELS[r.request_status]}
+                  </span>
+                  <span className="font-semibold">{r.company_name || r.title}</span>
+                  <span className="text-slate-400 text-sm">{r.requester_name}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-slate-500 text-xs">{new Date(r.created_at).toLocaleDateString('ko-KR')}</span>
+                  <span className="text-slate-500 text-sm">{expandedId === r.id ? '▲' : '▼'}</span>
+                </div>
+              </div>
+
+              {expandedId === r.id && (
+                <div className="border-t border-slate-700 px-4 py-4 space-y-3">
+                  {r.content && <p className="text-sm text-slate-200 bg-slate-900 rounded-lg p-3 whitespace-pre-wrap">{r.content}</p>}
+                  {r.request_status === 'pending' && (
+                    <div className="flex gap-2">
+                      <button onClick={() => handleStatusChange(r.id, 'approved')}
+                        className="bg-emerald-600 hover:bg-emerald-500 text-white text-sm px-4 py-1.5 rounded-lg">승인</button>
+                      <button onClick={() => handleStatusChange(r.id, 'rejected')}
+                        className="bg-red-700 hover:bg-red-600 text-white text-sm px-4 py-1.5 rounded-lg">반려</button>
+                    </div>
+                  )}
+                  {r.request_status === 'approved' && (
+                    <button onClick={() => handleStatusChange(r.id, 'done')}
+                      className="bg-slate-600 hover:bg-slate-500 text-white text-sm px-4 py-1.5 rounded-lg">완료 처리</button>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── AI 브리핑 탭 ─── */
+function BriefingTab() {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  async function generate() {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch('/api/briefing');
+      if (res.ok) setData(await res.json());
+      else { const d = await res.json(); setError(d.error || '생성 실패'); }
+    } catch { setError('네트워크 오류'); }
+    setLoading(false);
+  }
+
+  return (
+    <div className="max-w-3xl mx-auto">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-lg font-bold">🤖 AI 일일 브리핑</h3>
+        <button onClick={generate} disabled={loading}
+          className="bg-yellow-600 hover:bg-yellow-500 disabled:opacity-50 text-black font-semibold px-5 py-2 rounded-xl transition-colors">
+          {loading ? '생성 중...' : '브리핑 생성'}
+        </button>
+      </div>
+
+      {error && <p className="bg-red-900/40 border border-red-700 text-red-300 text-sm rounded-lg px-4 py-3 mb-4">{error}</p>}
+
+      {!data && !loading && (
+        <div className="text-center text-slate-500 py-20">
+          <p className="text-5xl mb-4">🤖</p>
+          <p className="text-lg mb-2">AI 브리핑</p>
+          <p className="text-sm">버튼을 클릭하면 오늘의 업무보고와 통계를 AI가 분석해<br/>대표님을 위한 브리핑을 생성합니다.</p>
+        </div>
+      )}
+
+      {loading && (
+        <div className="text-center py-20">
+          <div className="text-4xl mb-4 animate-pulse">🤖</div>
+          <p className="text-slate-400">AI가 분석 중입니다...</p>
+        </div>
+      )}
+
+      {data && !loading && (
+        <div className="space-y-4">
+          {/* 현황 카드 */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { label: '신규DB', value: data.stats.lead },
+              { label: '계약업체', value: data.stats.contracted },
+              { label: '총 고객수', value: data.stats.total },
+              { label: '총 매출', value: `${Math.round(data.stats.totalRevenue / 10000)}만원` },
+            ].map(s => (
+              <div key={s.label} className="bg-slate-800 border border-slate-700 rounded-xl p-3 text-center">
+                <p className="text-xl font-bold">{s.value}</p>
+                <p className="text-slate-400 text-xs mt-0.5">{s.label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* AI 브리핑 텍스트 */}
+          <div className="bg-slate-800 border border-yellow-600/30 rounded-xl p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-yellow-400 font-semibold text-sm">AI 분석 결과</span>
+              <span className="text-slate-500 text-xs">{data.date}</span>
+            </div>
+            <p className="text-slate-200 text-sm leading-relaxed whitespace-pre-wrap">{data.briefing}</p>
+          </div>
+
+          {/* 오늘 보고 목록 */}
+          {data.reports?.length > 0 && (
+            <div>
+              <h4 className="text-sm font-semibold text-slate-400 mb-2">오늘 제출된 보고 ({data.reports.length}건)</h4>
+              <div className="space-y-2">
+                {data.reports.map((r: any) => (
+                  <div key={r.id} className="bg-slate-800 border border-slate-700 rounded-xl px-4 py-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full">{r.report_type}</span>
+                      <span className="text-slate-400 text-xs">{r.author_name}</span>
+                    </div>
+                    <p className="text-sm text-slate-300 whitespace-pre-wrap">{r.content}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import ContractModal from './ContractModal';
 
 const STATUS_LABELS: Record<string, string> = {
   lead: '신규DB',
@@ -78,6 +79,7 @@ export default function CustomerCard({ customer, onUpdate, onDelete, role }: Pro
   });
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showContract, setShowContract] = useState(false);
 
   const sub = customer.status === 'contracted' ? 'contracted' : (customer.details?.sub_status || 'lead');
   const statusLabel = STATUS_LABELS[sub] || sub;
@@ -188,7 +190,15 @@ export default function CustomerCard({ customer, onUpdate, onDelete, role }: Pro
                   </div>
                 </div>
               )}
-              <div className="flex gap-2 pt-1">
+              <div className="flex gap-2 pt-1 flex-wrap">
+                {customer.status !== 'contracted' && (
+                  <button
+                    onClick={() => setShowContract(true)}
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white text-sm px-4 py-1.5 rounded-lg transition-colors"
+                  >
+                    계약 처리
+                  </button>
+                )}
                 <button
                   onClick={() => setEditing(true)}
                   className="bg-blue-600 hover:bg-blue-500 text-white text-sm px-4 py-1.5 rounded-lg transition-colors"
@@ -203,6 +213,14 @@ export default function CustomerCard({ customer, onUpdate, onDelete, role }: Pro
                   {deleting ? '삭제 중...' : '삭제'}
                 </button>
               </div>
+
+              {showContract && (
+                <ContractModal
+                  customer={customer}
+                  onClose={() => setShowContract(false)}
+                  onContracted={(updated) => { onUpdate(customer.id, updated); setShowContract(false); }}
+                />
+              )}
             </div>
           ) : (
             /* 수정 폼 */

@@ -4,6 +4,7 @@ import { signOut } from 'next-auth/react';
 import AIAssistant from '../AIAssistant';
 import CustomerBoard from './CustomerBoard';
 import ReportTab from './ReportTab';
+import RequestModal from './RequestModal';
 
 const TABS = [
   { id: 'home', label: '홈보드', icon: '🏠' },
@@ -13,6 +14,8 @@ const TABS = [
   { id: 'emotional', label: '감성톡', icon: '💬' },
   { id: 'trash', label: '거절', icon: '🗑️' },
   { id: 'revenue', label: '매출현황', icon: '💰' },
+  { id: 'review', label: '심사요청', icon: '📋' },
+  { id: 'as', label: 'A/S요청', icon: '🔧' },
   { id: 'report', label: '업무보고', icon: '📝' },
 ];
 
@@ -223,6 +226,12 @@ export default function SalesDashboard({ session }: { session: any }) {
           {/* 매출현황 */}
           {activeTab === 'revenue' && <RevenueTab />}
 
+          {/* 심사요청 */}
+          {activeTab === 'review' && <SalesRequestTab type="review" />}
+
+          {/* A/S요청 */}
+          {activeTab === 'as' && <SalesRequestTab type="as" />}
+
           {/* 업무보고 */}
           {activeTab === 'report' && <ReportTab />}
         </main>
@@ -294,6 +303,73 @@ function RevenueTab() {
             );
           })}
         </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── 영업팀 요청 탭 ─── */
+const REQ_STATUS_LABELS: Record<string, string> = { pending: '대기', approved: '승인', rejected: '반려', done: '완료' };
+const REQ_STATUS_COLORS: Record<string, string> = {
+  pending: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+  approved: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+  rejected: 'bg-red-500/20 text-red-300 border-red-500/30',
+  done: 'bg-slate-500/20 text-slate-400 border-slate-500/30',
+};
+
+function SalesRequestTab({ type }: { type: 'review' | 'as' }) {
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+
+  useEffect(() => {
+    async function load() {
+      setLoading(true);
+      const res = await fetch(`/api/requests?type=${type}`);
+      if (res.ok) setItems(await res.json());
+      setLoading(false);
+    }
+    load();
+  }, [type]);
+
+  const title = type === 'review' ? '심사요청' : 'A/S요청';
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-bold">{title}</h3>
+        <button onClick={() => setShowModal(true)}
+          className="bg-blue-600 hover:bg-blue-500 text-white text-sm px-4 py-1.5 rounded-lg">
+          + 요청 등록
+        </button>
+      </div>
+
+      {loading ? <p className="text-center text-slate-500 py-8">불러오는 중...</p> :
+        items.length === 0 ? (
+          <div className="text-center text-slate-500 py-16">
+            <p className="text-4xl mb-3">{type === 'review' ? '📋' : '🔧'}</p>
+            <p>등록된 {title}이 없습니다.</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {items.map(r => (
+              <div key={r.id} className="bg-slate-800 border border-slate-700 rounded-xl px-4 py-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className={`text-xs px-2 py-0.5 rounded-full border ${REQ_STATUS_COLORS[r.request_status]}`}>
+                    {REQ_STATUS_LABELS[r.request_status]}
+                  </span>
+                  <span className="font-semibold">{r.company_name}</span>
+                  <span className="text-slate-500 text-xs ml-auto">{new Date(r.created_at).toLocaleDateString('ko-KR')}</span>
+                </div>
+                {r.content && <p className="text-sm text-slate-300 mt-1">{r.content}</p>}
+              </div>
+            ))}
+          </div>
+        )
+      }
+
+      {showModal && (
+        <RequestModal type={type} onClose={() => setShowModal(false)} />
       )}
     </div>
   );
