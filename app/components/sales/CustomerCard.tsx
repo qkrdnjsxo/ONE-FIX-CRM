@@ -3,11 +3,11 @@ import { useState } from 'react';
 import ContractModal from './ContractModal';
 
 const STATUS_LABELS: Record<string, string> = {
-  lead: '신규DB',
-  db010: '010DB',
-  emotional: '감성톡',
-  trash: '거절',
-  contracted: '계약',
+  lead: '공급DB',
+  db010: '직접DB',
+  emotional: '지속관리',
+  trash: '자체거절',
+  contracted: '계약완료',
 };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -54,10 +54,10 @@ interface Props {
 const REACTION_OPTIONS = ['긍정', '중립', '부정'];
 const RESULT_OPTIONS = ['보류', '계약', '거절'];
 const STATUS_OPTIONS = [
-  { value: 'lead', label: '신규DB' },
-  { value: 'db010', label: '010DB' },
-  { value: 'emotional', label: '감성톡' },
-  { value: 'trash', label: '거절' },
+  { value: 'lead', label: '공급DB' },
+  { value: 'db010', label: '직접DB' },
+  { value: 'emotional', label: '지속관리' },
+  { value: 'trash', label: '자체거절' },
 ];
 
 export default function CustomerCard({ customer, onUpdate, onDelete, role }: Props) {

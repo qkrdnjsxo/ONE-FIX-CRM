@@ -182,10 +182,10 @@ export default function AddCustomerModal({ defaultSubStatus = 'lead', onClose, o
                 onChange={e => setForm(f => ({ ...f, sub_status: e.target.value }))}
                 className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
               >
-                <option value="lead">신규DB</option>
-                <option value="db010">010DB</option>
-                <option value="emotional">감성톡</option>
-                <option value="trash">거절</option>
+                <option value="lead">공급DB</option>
+                <option value="db010">직접DB</option>
+                <option value="emotional">지속관리</option>
+                <option value="trash">자체거절</option>
               </select>
             </div>
           </div>

@@ -126,10 +126,10 @@ export default function CeoDashboard({ session }: { session: any }) {
 
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-6">
                 {[
-                  { label: '신규DB', value: stats?.lead, color: 'bg-blue-600', tab: 'customer' },
-                  { label: '010DB', value: stats?.db010, color: 'bg-purple-600', tab: 'customer' },
-                  { label: '감성톡', value: stats?.emotional, color: 'bg-pink-600', tab: 'customer' },
-                  { label: '계약업체', value: stats?.contracted, color: 'bg-emerald-600', tab: 'customer' },
+                  { label: '공급DB', value: stats?.lead, color: 'bg-blue-600', tab: 'customer' },
+                  { label: '직접DB', value: stats?.db010, color: 'bg-purple-600', tab: 'customer' },
+                  { label: '지속관리', value: stats?.emotional, color: 'bg-pink-600', tab: 'customer' },
+                  { label: '계약완료', value: stats?.contracted, color: 'bg-emerald-600', tab: 'customer' },
                   { label: '총 고객수', value: stats?.total, color: 'bg-slate-600', tab: 'customer' },
                   { label: '계약 개수', value: stats?.totalWeight != null ? `${stats.totalWeight}개` : '-', color: 'bg-amber-600', tab: 'revenue' },
                   { label: '총 매출액', value: stats?.totalRevenue != null ? `${(stats.totalRevenue / 10000).toFixed(0)}만원` : '-', color: 'bg-green-700', tab: 'revenue' },
@@ -248,11 +248,11 @@ function CeoCustomerTab() {
         <div className="flex gap-1.5 flex-wrap">
           {[
             { value: 'all', label: '전체' },
-            { value: 'lead', label: '신규DB' },
-            { value: 'db010', label: '010DB' },
-            { value: 'emotional', label: '감성톡' },
-            { value: 'trash', label: '거절' },
-            { value: 'contracted', label: '계약' },
+            { value: 'lead', label: '공급DB' },
+            { value: 'db010', label: '직접DB' },
+            { value: 'emotional', label: '지속관리' },
+            { value: 'trash', label: '자체거절' },
+            { value: 'contracted', label: '계약완료' },
           ].map(f => (
             <button
               key={f.value}

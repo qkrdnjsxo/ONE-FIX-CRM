@@ -9,11 +9,11 @@ import NoticeBoard from '../shared/NoticeBoard';
 
 const TABS = [
   { id: 'home', label: '홈보드', icon: '🏠' },
-  { id: 'lead', label: '고객DB', icon: '📋' },
-  { id: 'db010', label: '010DB', icon: '📱' },
-  { id: 'contracted', label: '계약업체', icon: '✅' },
-  { id: 'emotional', label: '감성톡', icon: '💬' },
-  { id: 'trash', label: '거절', icon: '🗑️' },
+  { id: 'lead', label: '공급DB', icon: '📋' },
+  { id: 'db010', label: '직접DB', icon: '📱' },
+  { id: 'contracted', label: '계약완료', icon: '✅' },
+  { id: 'emotional', label: '지속관리', icon: '💬' },
+  { id: 'trash', label: '자체거절', icon: '🗑️' },
   { id: 'revenue', label: '매출현황', icon: '💰' },
   { id: 'review', label: '심사요청', icon: '📋' },
   { id: 'as', label: 'A/S요청', icon: '🔧' },
@@ -135,11 +135,11 @@ export default function SalesDashboard({ session }: { session: any }) {
               {/* 통계 카드 */}
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mb-6">
                 {[
-                  { label: '신규DB', value: stats.lead, color: 'bg-blue-600', tab: 'lead' },
-                  { label: '010DB', value: stats.db010, color: 'bg-purple-600', tab: 'db010' },
-                  { label: '감성톡', value: stats.emotional, color: 'bg-pink-600', tab: 'emotional' },
-                  { label: '거절', value: stats.trash, color: 'bg-red-600', tab: 'trash' },
-                  { label: '계약업체', value: stats.contracted, color: 'bg-emerald-600', tab: 'contracted' },
+                  { label: '공급DB', value: stats.lead, color: 'bg-blue-600', tab: 'lead' },
+                  { label: '직접DB', value: stats.db010, color: 'bg-purple-600', tab: 'db010' },
+                  { label: '지속관리', value: stats.emotional, color: 'bg-pink-600', tab: 'emotional' },
+                  { label: '자체거절', value: stats.trash, color: 'bg-red-600', tab: 'trash' },
+                  { label: '계약완료', value: stats.contracted, color: 'bg-emerald-600', tab: 'contracted' },
                 ].map(s => (
                   <button
                     key={s.tab}
